@@ -1,0 +1,9 @@
+venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+mongeasy_config.yml
+sudoku.csv
