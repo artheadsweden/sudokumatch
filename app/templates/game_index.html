@@ -6,7 +6,23 @@
     <title>Sudoku Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
     <style>
+        .container {
+            
+            justify-content: center;
+            align-items: start;
+        }
+        
+        .columns {
+            align-items: start;
+        }
+        .sidebar {
+            margin-left: 20px; /* Space between grid and sidebar */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
         .sudoku-grid {
+            background-color: pink;
             display: grid;
             grid-template-columns: repeat(9, 1fr);
             gap: 2px; /* Adjust gap for cell spacing */
@@ -24,6 +40,42 @@
             align-items: center;
             aspect-ratio: 1; /* Keeps cells square */
             user-select: none; /* Prevent default select action */
+            grid-column: auto / span 1; /* Each cell takes up 1 fraction of space */
+            grid-row: auto / span 1;    
+        }
+
+
+        /* Place cells, skipping separator lines */
+        .sudoku-grid > :nth-child(9n+1) { grid-column-start: 2; }
+        .sudoku-grid > :nth-child(9n+2) { grid-column-start: 3; }
+        /* ... Continue for all 9 cells in a row, skipping grid lines at 4 and 8 ... */
+        .sudoku-grid > :nth-child(9n+9) { grid-column-start: 11; }
+
+        .sudoku-grid::before, .sudoku-grid::after {
+            content: '';
+            grid-column: 4 / 5; /* Vertical separator */
+            grid-row: 1 / 12; /* Span all rows */
+            background-color: black;
+        }
+
+        .sudoku-grid::after {
+            grid-column: 8 / 9; /* Second vertical separator */
+        }
+
+        /* Horizontal separators */
+        .sudoku-grid > :nth-child(27)::after, .sudoku-grid > :nth-child(54)::after {
+            content: '';
+            grid-row: 4 / 5; /* First horizontal separator */
+            grid-column: 1 / 12; /* Span all columns */
+            background-color: black;
+            width: 100%;
+            height: 3px;
+            position: absolute;
+            left: 0;
+        }
+
+        .sudoku-grid > :nth-child(54)::after {
+            grid-row: 8 / 9; /* Second horizontal separator */
         }
 
         /* Style for thicker borders */
@@ -35,7 +87,7 @@
         .sudoku-grid > :nth-child(n+73):nth-child(-n+81) {
             border-bottom: 3px solid black;
         }
-            .given-number {
+        .given-number {
             color: blue;
             font-weight: bold;
         }
@@ -88,89 +140,326 @@
     .mark-7 { grid-column: 1; grid-row: 3; } /* bottom left */
     .mark-8 { grid-column: 2; grid-row: 3; } /* bottom center */
     .mark-9 { grid-column: 3; grid-row: 3; } /* bottom right */
-
-    .sudoku-cell.highlight {
-        background-color: rgba(255, 255, 0, 0.75); /* Yellow background for the entire cell */
-        border-radius: 50%; /* Optional: if you want rounded corners */
-    }
-
-    /* Highlighting for individual pencil marks */
-    .pencil-marks .highlight {
-        background-color: rgba(255, 0, 0, 0.75); /* Yellow background for pencil marks */
-    }
-
-    .highlight {
-        background-color: rgba(255, 255, 0, 0.75);
-        /* border-radius: 50%; */
-    }
-
-    /* Highlighting for individual pencil marks */
-    .pencil-marks .highlight::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 0, 0.75);
-        border-radius: 50%;
-        z-index: -1;
-    }
  
+    .highlight-main {
+        background-color: rgba(255, 255, 0, 0.75); /* Yellow background */
+        border-radius: 5%;
+        /* Any other styling you want for highlighted main digits */
+    }
+
+    .highlight-mark {
+        background-color: rgba(255, 255, 0, 0.75); /* Green background */
+        border-radius: 50%;
+        /* Any other styling you want for highlighted pencil marks */
+    }
+
+    .button-complete {
+        background-color: #90ee90; /* Light green, or any color of your choice */    
+    }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 30%; /* Width including the border */
+        height: 15%; /* Height including the border */
+        background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* Add some shadow for depth */
+        padding: 10px; /* Space for the border effect */
+        box-sizing: border-box; /* Ensure padding is included in width/height */
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        color: #24aefc;
+        font-size: large;
+        padding: 20px;
+        border: 1px solid black; /* Thin black border */
+        width: 100%; /* Take full width of .modal */
+        height: 100%; /* Take full height of .modal */
+        text-align: center;
+        border-radius: 10px; /* Rounded corners */
+        position: relative; /* Relative for positioning close button */
+    }
+
+    .modal-close {
+        cursor: pointer;
+        position: absolute;
+        right: 00;
+        top: 0;
+        z-index: 2;
+        border-radius: 50%; /* Circular close button */
+        border: 1px solid #888; /* Border for the close button */
+        background-color: rgba(0, 0, 0, 0.5);
+        font-size: 20px; /* Size of 'X' text */
+        line-height: 25px; /* Center 'X' vertically */
+        text-align: center; /* Center 'X' horizontally */
+        width: 25px; /* Width of the close button */
+        height: 25px; /* Height of the close button */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    
     </style>
 </head>
 <body>
     <section class="section">
         <div class="container">
             <h1 class="title">Sudoku Game</h1>
-            <div class="sudoku-grid">
-                {% for i in range(81) %}
-                    {% set value = sudoku[i] %}
-                        <div class="{{ 'sudoku-cell' if value == '0' else 'sudoku-cell given-number' }}" 
-                            onclick="cellClicked(this, '{{ i }}', event)"
-                        >
-                   {{ value if value != '0' else '' }}
-               </div>
-               
-                {% endfor %}
-            </div>
-            <!-- Buttons and other controls -->
-            <div class="buttons-container">
-                {% for i in range(1, 10) %}
-                    <button class="button button-round" onclick="selectDigit({{ i }})">{{ i }}</button>
-                {% endfor %}
-                <button class="button button-round" onclick="selectDigit('erase')">X</button>
+            <div class="columns">
+                <!-- Sudoku Grid and Game Buttons Column -->
+                <div class="column is-half">
+                    <div class="sudoku-grid">
+                        {% for i in range(81) %}
+                            {% set value = sudoku[i] %}
+                                <div class="{{ 'sudoku-cell' if value == '0' else 'sudoku-cell given-number' }}" 
+                                    onclick="cellClicked(this, '{{ i }}', event)">
+                                         {{ value if value != '0' else '' }}
+                                 </div>
+                                 
+                        {% endfor %}
+                    </div>
+                    <!-- Buttons and other controls -->
+                    <div class="buttons-container">
+                        {% for i in range(1, 10) %}
+                        <button class="button button-round" onclick="selectDigit({{ i }})">{{ i }}</button>
+                        {% endfor %}
+                        <button class="button button-round" onclick="selectDigit('erase')">X</button>
+                    </div>
+                </div>
+                <!-- Sidebar -->
+                <!-- Difficulty Selection and New Game Column -->
+                <div class="column is-narrow">
+                    <div class="sidebar">
+                        <div class="control">
+                            <label for="difficulty">Select Difficulty:</label>
+                            <div class="select">
+                                <select id="difficulty">
+                                    <option value="simple">Simple</option>
+                                    <option value="easy" selected>Easy</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
+                                    <option value="very_hard">Very Hard</option>
+                                    <option value="extreme">Extreme</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="newGameButton" class="button is-primary mt-2">New Game</button>
+                        <div class="control">
+                            <label class="checkbox">
+                                <input type="checkbox" id="showHints">
+                                Show hints
+                            </label>
+                        </div>
+                        <button id="solveButton" class="button is-primary mt-2">Solve</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <p id="modal-text"></p>
+        </div>
+        <button id="close-modal" class="modal-close is-large" aria-label="close"></button>
+    </div>
     <script>
         let selectedDigit = 1;
-        checkDigitCounts();
-        document.querySelector(`button[onclick="selectDigit(1)"]`).classList.add('is-selected');
-        highlightDigits('1');
+        let solution = ""; // Store the solution globally
 
+        checkDigitCounts();
+        selectDigit(selectedDigit);
+        document.querySelector(`button[onclick="selectDigit(1)"]`).classList.add('is-selected');
+
+        // Call this function when the page loads and when a new game is started
+        document.addEventListener('DOMContentLoaded', startNewGame('easy'));
+
+
+        function showModal(message) {
+            document.getElementById('modal-text').innerText = message;
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        document.getElementById('close-modal').addEventListener('click', closeModal);
+
+        document.getElementById('solveButton').addEventListener('click', function() {
+            solvePuzzle();
+        });
+
+        function solvePuzzle() {
+            const cells = document.querySelectorAll('.sudoku-cell');
+            cells.forEach((cell, index) => {
+                if (!cell.classList.contains('given-number')) {
+                    cell.textContent = solution[index];
+                }
+            });
+
+            // Check if the solution is correct (this will always be true in this case)
+            checkSolution();
+        }
+
+        function startNewGame(difficulty) {
+            fetch(`/game/${difficulty}`)
+                .then(response => response.json())
+                .then(data => {
+                    solution = data.solution; // Save the solution
+                    updateGrid(data.puzzle);
+                })
+                .catch(error => console.error('Error fetching initial game:', error));
+        }
+
+        document.getElementById('newGameButton').addEventListener('click', function() {
+            const difficulty = document.getElementById('difficulty').value;
+            fetch(`/game/${difficulty}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the grid with the new puzzle
+                    solution = data.solution;
+                    updateGrid(data.puzzle);
+                    resetDigitButtons()
+
+                })
+                .catch(error => console.error('Error fetching new game:', error));
+        });
+
+        function resetDigitButtons() {
+            document.querySelectorAll('.button-round').forEach(button => {
+                button.classList.remove('is-selected', 'button-complete');
+            });
+            // Ensure digit 1 button is selected
+            document.querySelector(`button[onclick="selectDigit(1)"]`).classList.add('is-selected');
+        }
+
+        function updateGrid(puzzle) {
+            // Logic to update the grid cells with the new puzzle
+            const cells = document.querySelectorAll('.sudoku-cell');
+            cells.forEach((cell, index) => {
+                cell.textContent = puzzle[index] !== '0' ? puzzle[index] : '';
+                cell.classList.remove('given-number', 'highlight-main', 'highlight-mark');
+                if (puzzle[index] !== '0') {
+                    cell.classList.add('given-number');
+                }
+            });
+
+            // Remove pencil marks if present
+            cells.forEach(cell => {
+                let pencilMarks = cell.querySelector('.pencil-marks');
+                if (pencilMarks) {
+                    cell.removeChild(pencilMarks);
+                }
+            });
+
+            // Reset digit buttons and select digit 1
+            resetDigitButtons();
+            selectDigit(1);
+            checkGameComplete();
+        }
+
+        function updateHintDisplay(cell = null) {
+            const cells = cell ? [cell] : document.querySelectorAll('.sudoku-cell');
+            const showHints = document.getElementById('showHints').checked;
+
+            cells.forEach((cell, index) => {
+                if (showHints && !cell.classList.contains('given-number')) {
+                    if (cell.textContent.trim() === solution[index]) {
+                        cell.style.color = 'green'; // Mark correct digits green
+                    } else if (cell.textContent.trim() !== '' && cell.textContent.trim() !== solution[index]) {
+                        cell.style.color = 'red'; // Mark incorrect digits red
+                    } else {
+                        cell.style.color = ''; // Revert to default color for empty cells
+                    }
+                } else {
+                    cell.style.color = ''; // Revert to default color
+                }
+            });
+        }
+
+        function updateHintDisplayForCell(cell, index) {
+            const showHints = document.getElementById('showHints').checked;
+            const cellValue = cell.textContent.trim();
+
+            if (showHints && !cell.classList.contains('given-number')) {
+                if (cellValue === solution[index]) {
+                    cell.style.color = 'green'; // Mark correct digits green
+                } else if (cellValue !== '') {
+                    cell.style.color = 'red'; // Mark incorrect digits red
+                } else {
+                    cell.style.color = ''; // Revert to default color for empty cells
+                }
+            } else {
+                cell.style.color = ''; // Revert to default color
+            }
+        }
+
+        function checkGameComplete() {
+            const cells = document.querySelectorAll('.sudoku-cell');
+            let isComplete = true;
+            cells.forEach(cell => {
+                if (cell.textContent.trim() === '' && !cell.classList.contains('given-number')) {
+                    isComplete = false;
+                }
+            });
+
+            if (isComplete) {
+                checkSolution();
+            }
+        }
+
+        function checkSolution() {
+            const cells = document.querySelectorAll('.sudoku-cell');
+            let isCorrect = true;
+            cells.forEach((cell, index) => {
+                if (cell.textContent.trim() !== solution[index] && !cell.classList.contains('given-number')) {
+                    isCorrect = false;
+                }
+            });
+
+            if (isCorrect) {
+                showModal('Congratulations! You have solved the puzzle.');
+            } else {
+                showModal('Some digits are incorrect. Please try again.');
+            }
+        }
 
         function checkDigitCounts() {
             for (let digit = 1; digit <= 9; digit++) {
                 let count = 0;
                 document.querySelectorAll('.sudoku-cell').forEach(cell => {
-                    if (cell.textContent.trim() === digit.toString()) {
+                    let cellContent = cell.textContent.trim();
+                    let pencilMarks = cell.querySelector('.pencil-marks');
+                    // Count only if the cell's main content matches the digit and there are no pencil marks
+                    if (cellContent === digit.toString() && (!pencilMarks || pencilMarks.textContent.trim() === '')) {
                         count++;
                     }
                 });
 
                 // Enable/disable the button based on the count
-                const button = document.querySelector(`button[onclick="selectDigit(${digit})"]`);
-                if (count === 9) {
-                    button.disabled = true;
+                let button = document.querySelector(`button[onclick="selectDigit(${digit})"]`);
+                if (count >= 9) {
+                    button.classList.add('button-complete');
                 } else {
-                    button.disabled = false;
+                    button.classList.remove('button-complete');
                 }
             }
         }
 
+
+        // Event listener for the 'Show Hints' checkbox
+        document.getElementById('showHints').addEventListener('change', function() {
+            updateHintDisplay();
+        });
 
         function selectDigit(digit) {
             // Remove 'is-selected' class from all buttons
@@ -187,60 +476,55 @@
 
             // Set the selected digit or 'erase'
             selectedDigit = digit;
-            // Highlight all instances of the selected digit
-            highlightCells(digit);
-            highlightDigits(digit);
-        }
+            highlightMainDigits(digit);
+            highlightPencilMarks(digit);
 
-        function highlightDigits(digit) {
-            // Remove existing highlights
-            document.querySelectorAll('.highlight').forEach(highlighted => {
-                highlighted.classList.remove('highlight');
-            });
-
-            if (digit !== 'erase') {
-                document.querySelectorAll('.sudoku-cell').forEach(cell => {
-                    let cellContent = cell.textContent.trim();
-
-                    // Only highlight pencil marks if the cell doesn't have a main digit
-                    if (cellContent === ' ') {
-                        cell.querySelectorAll('.pencil-marks .mark-' + digit).forEach(mark => {
-                            mark.classList.add('highlight');
-                        });
+            // Update hints for all cells
+            if (document.getElementById('showHints').checked) {
+                document.querySelectorAll('.sudoku-cell').forEach((cell, index) => {
+                    if (!cell.classList.contains('given-number')) {
+                        updateHintDisplayForCell(cell, index);
                     }
                 });
             }
         }
 
+
         function cellClicked(cell, index, event) {
             if (selectedDigit === null) return; // No digit selected
-
             if (cell.classList.contains('given-number')) return; // Ignore clicks on given numbers
 
-            // Check if the cell is empty (ignoring pencil marks)
-            const isCellEmpty = !cell.firstChild || cell.firstChild.nodeType !== Node.TEXT_NODE || cell.textContent.trim() === '';
+            const pencilMarks = cell.querySelector('.pencil-marks');
+            let newValue = '';
 
-            if (event.shiftKey) {
+            if (event.shiftKey && selectedDigit !== 'erase') {
                 // Toggle pencil marks regardless of whether the cell is empty or not
                 togglePencilMark(cell, selectedDigit);
             } else {
-                // Check if 'erase' is selected
                 if (selectedDigit === 'erase') {
-                    cell.textContent = ''; // Erase the digit
+                    // Erase the digit and pencil marks if present
+                    cell.textContent = '';
+                    if (pencilMarks) {
+                        cell.removeChild(pencilMarks);
+                    }
                 } else {
-                    // For a regular click, place or erase a digit
-                    if (isCellEmpty || cell.textContent === selectedDigit.toString()) {
-                        cell.textContent = selectedDigit; // Place new digit or erase if same digit
+                    // Place new digit or erase if same digit
+                    newValue = cell.textContent === selectedDigit.toString() ? '' : selectedDigit.toString();
+                    cell.textContent = newValue;
+                    if (pencilMarks) {
+                        cell.removeChild(pencilMarks);
                     }
                 }
             }
 
-            // Update highlighting and check digit counts
-            highlightCells(selectedDigit);
-            highlightDigits(selectedDigit);
+            // Update hint display for the clicked cell if hints are enabled
+            updateHintDisplayForCell(cell, index);
+
             checkDigitCounts();
+            checkGameComplete();
+            highlightMainDigits(selectedDigit);
+            highlightPencilMarks(selectedDigit);
         }
-    
 
         function togglePencilMark(cell, digit) {
             // Create a container for pencil marks if it doesn't exist
@@ -263,9 +547,38 @@
                 mark.textContent = digit;
                 pencilMarks.appendChild(mark);
             }
-            highlightDigits(selectedDigit);
-
+            highlightPencilMarks(selectedDigit);
         }
+
+        function highlightMainDigits(digit) {
+            document.querySelectorAll('.sudoku-cell').forEach(cell => {
+                // Remove existing highlight
+                cell.classList.remove('highlight-main');
+
+                let cellContent = cell.textContent.trim();
+                let pencilMarks = cell.querySelector('.pencil-marks');
+
+                // Add highlight only if the cell's main content matches the digit and there are no pencil marks
+                if (cellContent === digit.toString() && (!pencilMarks || pencilMarks.textContent.trim() === '')) {
+                    cell.classList.add('highlight-main');
+                }
+            });
+        }
+
+
+        function highlightPencilMarks(digit) {
+            document.querySelectorAll('.pencil-marks span').forEach(mark => {
+                // Remove existing highlight
+                mark.classList.remove('highlight-mark');
+
+                // Add highlight if the mark's content matches the digit
+                if (mark.textContent === digit.toString()) {
+                    mark.classList.add('highlight-mark');
+                }
+            });
+        }
+
+
     </script>
 </body>
 </html>

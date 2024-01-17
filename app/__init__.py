@@ -14,6 +14,7 @@ User.get_id = get_id
 
 def create_app():
     app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'lkj/30JKL!LKJSDN830kjsdsfmnk)983jjnsb'
    # Define the user loader function for Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
