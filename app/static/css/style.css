@@ -1,0 +1,321 @@
+body, html {
+    height: 100%;
+    margin: 0;
+}
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+
+
+#sudoku-container {
+    display: flex;
+    flex-direction: row; 
+    justify-content: center; /* Center content horizontally */
+    align-items: start; /* Align items to the start vertically */
+    width: 100%; /* Container takes full width of the viewport */
+    max-width: 800px; /* Optional: Max width can be set */
+    margin: 0 auto; /* Center the container on the page */
+    padding: 20px;
+    background-color: #e8eff7;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 20px; /* Space between game grid and control buttons */
+}
+
+#info-area {
+    padding: 10px;
+    margin-bottom: 10px; /* Spacing between info area and the game grid */
+    background-color: #c3e2ee; /* Background color */
+    border-radius: 4px; /* Rounded corners */
+    text-align: center; /* Centered text */
+    font-family: 'Rubik', sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+}
+
+#sudoku-and-numbers {
+    display: flex;
+    flex-direction: column;
+    width: fit-content; /* Ensures the container only takes up as much space as needed */
+}
+
+#game-controls {
+    display: flex;
+    flex-direction: column;
+    width: fit-content; /* Optional, adjust based on design preference */
+}
+
+#sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); /* Adjust the minmax value based on cell size */
+    gap: 2px; /* Regular gap between cells */
+    padding: 2px; /* Adjust if needed */
+    
+    background-color: #888;
+    /* box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1); */
+    position: relative;
+    justify-content: center; /* Center the grid if it's smaller than the parent */
+
+
+    grid-template-columns: repeat(3, 126px); /* width of each 3x3 group */
+    grid-template-rows: repeat(3, 126px); /* height of each 3x3 group */
+    width: 382px;
+    height: 382px;
+    margin-left: 64px;
+
+    border-radius: 1%;
+}
+
+.group {
+    display: grid;
+    grid-template-columns: repeat(3, 40px);
+    grid-template-rows: repeat(3, 40px);
+    gap: 2px;
+}
+
+/* Add margins to create gaps between groups, but not on the outer edges */
+.group:not(:nth-child(3n)) {
+    margin-right: 10px; /* Right margin for the first and second column groups */
+}
+
+.group:not(:nth-last-child(-n+3)) {
+    margin-bottom: 10px; /* Bottom margin for the top two row groups */
+}
+
+.cell {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    border-radius: 10%;
+    font-family: 'Rubik', sans-serif;
+    user-select: none; /* Prevent text selection inside cells */
+}
+
+.group, .cell {
+    margin: 0; /* Ensuring no extra margin is added */
+}
+
+#number-buttons {
+    display: flex; /* Enables Flexbox layout */
+    justify-content: center; /* Horizontally centers the child elements */
+    flex-wrap: wrap; /* Allows items to wrap onto multiple lines if needed */
+    gap: 10px; /* Adds space between each button */
+    margin-top: 20px; /* Adds space between the grid and the buttons */
+    /* Add any other necessary styles, like padding, border, etc. */
+}
+
+.num-btn {
+    position: relative;
+    padding: 10px 15px; /* Adjust padding as needed */
+    border: 1px solid #333; /* Adds a border to the button */
+    background-color: #91d3ed; /* Button background color */
+    cursor: pointer; /* Changes cursor to pointer on hover */
+    border-radius: 50%;
+    box-shadow: 2px 2px 2px 1px #333; /* Adds a drop shadow to the button */
+    font-family: 'Rubik', sans-serif;
+    /* Add any other button-specific styles */
+}
+
+.num-btn.selected {
+    background-color: #72a4d2; /* Change color for selected state */
+    color: white; /* Change text color for better contrast */
+    box-shadow: none;
+    left: -1px;
+    top: -1px;
+    /* Add any other styles for selected state */
+}
+
+.num-btn.no-more {
+    background-color: #aaa;
+}
+
+
+.counter {
+    position: absolute;
+    top: -4px; /* Adjust as needed */
+    right: -4px; /* Adjust as needed */
+    font-size: 0.75em; /* Smaller font size for the counter */
+    color: #ccc; /* Color of the counter text */
+    background-color: rgba(0, 0, 0, 0.75); /* Background color of the counter */
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    border: 1px solid #666;
+}
+.control-btn {
+    padding: 10px 15px;
+    margin: 5px 0; /* Space between buttons */
+    background-color: #c3e2ee; /* Background color */
+    border: 1px solid #333; /* Border */
+    border-radius: 4px; /* Rounded corners */
+    text-align: center; /* Center the text */
+    cursor: pointer; /* Pointer cursor on hover */
+    box-shadow: 2px 2px 2px 1px #333; /* Shadow for depth */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition for interactions */
+    font-family: 'Rubik', sans-serif;
+}
+
+.control-btn.active {
+    background-color: #4CAF50; /* Example: green background for active state */
+    color: white;
+    /* Add any other styles for active state */
+}
+
+.control-btn:hover {
+    background-color: #7fbdd4; /* Slightly darker on hover */
+    box-shadow: 3px 3px 4px 2px #333; /* Larger shadow on hover */
+}
+
+#difficulty-select {
+    padding: 10px 15px; /* Similar padding to buttons */
+    background-color: #c3e2ee; /* Matching background color */
+    border: 1px solid #333; /* Consistent border */
+    border-radius: 4px; /* Rounded corners */
+    font-family: 'Rubik', sans-serif; /* Consistent font family */
+    cursor: pointer; /* Pointer cursor on hover */
+    box-shadow: 2px 2px 2px 1px #333; /* Shadow for depth */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition for interactions */
+
+    appearance: none; /* Removes default styling provided by the browser */
+    -webkit-appearance: none; /* Specifically for WebKit browsers */
+    -moz-appearance: none; /* Specifically for Mozilla browsers */
+}
+#difficulty-select:focus {
+    outline: none; /* Removes the default outline */
+}
+
+#difficulty-select:hover {
+    background-color: #7fbdd4; /* Slightly darker on hover */
+    box-shadow: 3px 3px 4px 2px #333; /* Larger shadow on hover */
+}
+
+/* Optional: Custom dropdown arrow */
+#difficulty-select {
+    background-image: url('/static/img/dropdown.png'); /*custom arrow image */
+    background-repeat: no-repeat;
+    background-position: right 10px center; /* Adjust as necessary */
+    padding-right: 30px; /* Make sure text doesn't overlap the arrow */
+}
+
+
+.given {
+    color: blue;
+    background-color: #eee;
+    font-weight: bold;
+}
+
+.given-highlight {
+    background-color: #f35516; /* Choose a color that indicates highlighting */
+    /* Other styles if needed */
+}
+
+.entered-highlight {
+    background-color: #f35516; /* Choose a color that indicates highlighting */
+    /* Other styles if needed */
+}
+
+.pencil-mark-highlight {
+    background-color: #f35516; /* Choose a color that indicates highlighting */
+    color: white;
+    border-radius: 50%;
+    /* Other styles if needed */
+}
+
+.pencil-marks {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width of the cell */
+    height: 100%; /* Full height of the cell */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    pointer-events: none; /* Prevents the div from capturing click events */
+    font-size: 8px; /* Adjust the font size of pencil marks */
+}
+
+.pencil-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pencil-mark.mark-1 { grid-area: 1 / 1 / 2 / 2; } /* Top left */
+.pencil-mark.mark-2 { grid-area: 1 / 2 / 2 / 3; } /* Top center */
+.pencil-mark.mark-3 { grid-area: 1 / 3 / 2 / 4; } /* Top right */
+.pencil-mark.mark-4 { grid-area: 2 / 1 / 3 / 2; } /* Middle left */
+.pencil-mark.mark-5 { grid-area: 2 / 2 / 3 / 3; } /* Center */
+.pencil-mark.mark-6 { grid-area: 2 / 3 / 3 / 4; } /* Middle right */
+.pencil-mark.mark-7 { grid-area: 3 / 1 / 4 / 2; } /* Bottom left */
+.pencil-mark.mark-8 { grid-area: 3 / 2 / 4 / 3; } /* Bottom center */
+.pencil-mark.mark-9 { grid-area: 3 / 3 / 4 / 4; } /* Bottom right */
+
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #e8eff7;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%; /* Could be more or less, depending on screen size */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#loading-modal .modal-content {
+    /* Style as needed */
+    text-align: center;
+    padding: 20px;
+}
+
+
+#sudoku-grid.hint-mode {
+    cursor: pointer; /* Change cursor to indicate that a hint can be selected */
+    background-color: pink;
+}
+
